@@ -389,8 +389,6 @@
 
     // --- Destinations: each row fades up once as it comes into view (time-based, not tied to the scroll)
     $$('.drow').forEach(row => gsap.from(row, { y: 60, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: row, start: 'top 85%' } }));
-    // --- Experiences: the four cards fade up once, one after another
-    gsap.from('.xcard', { y: 60, opacity: 0, stagger: .1, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '.xcards', start: 'top 85%' } });
 
     // --- Postcard deck tilts in
     gsap.from('.deck', { rotate: 8, y: 120, opacity: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.deck', start: 'top 85%' } });
