@@ -380,21 +380,19 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 
 /* ---------- Why us: the passport (pinned, pages flip with scroll) ---------- */
 .why {
-  position: relative; height: 100vh; height: 100svh;
-  margin-top: clamp(60px, 8vw, 120px);
-  /* top padding keeps the title clear of the fixed navbar while pinned */
-  padding: 88px 0 28px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(14px, 3vh, 36px);
+  position: relative;
+  margin-top: clamp(80px, 10vw, 150px);
+  display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 3vh, 36px);
 }
 .why__head { text-align: center; }
 .why__title { font-family: var(--serif); font-size: min(clamp(40px, 4.6vw, 76px), 7.5svh); line-height: .95; letter-spacing: -.02em; }
 .why__title em { color: var(--sun); }
 .why__hint { margin: min(12px, 1.2svh) 0 0; color: var(--ink-soft); }
-.why__hint i { display: inline-block; font-style: normal; animation: nudgeDown 1.4s var(--ease) infinite; }
-@keyframes nudgeDown { 50% { transform: translateY(4px); } }
 
 .passport {
-  --pw: min(32vw, 470px, calc((100svh - 88px - 28px - 15svh - 50px) / 1.42));
+  --pw: min(30vw, 420px, calc((100svh - 300px) / 1.42));
+  /* vertical page scrolling stays native over the passport; sideways swipes turn its pages (main.js) */
+  touch-action: pan-y;
   --ph: calc(var(--pw) * 1.42);
   --leather: #172a3c;
   --paper-pp: #f7f1e4;
@@ -402,6 +400,11 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
   perspective: 2600px;
 }
 .passport__book { position: absolute; inset: 0; transform-style: preserve-3d; }
+.pp-ctrl { display: flex; align-items: center; gap: 18px; }
+.pp-ctrl__btn { width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid var(--ink); background: none; color: var(--ink); font-size: 20px; cursor: pointer; transition: background .3s, color .3s, opacity .3s; }
+.pp-ctrl__btn:hover { background: var(--ink); color: var(--cream); }
+.pp-ctrl__btn:disabled { opacity: .25; pointer-events: none; }
+.pp-ctrl__count { min-width: 9ch; text-align: center; color: var(--ink-soft); }
 
 /* leather back cover + the edge of the page block */
 .pp-base { position: absolute; top: -7px; bottom: -7px; background: var(--leather); box-shadow: 0 40px 70px -30px rgba(20,15,10,.55); }
@@ -506,7 +509,7 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 
 @media (max-width: 900px) {
   /* phones: one page at a time, like flicking through a passport in your hand */
-  .passport { --pw: min(86vw, calc((100svh - 88px - 28px - 15svh - 40px) / 1.42)); width: var(--pw); }
+  .passport { --pw: min(84vw, calc((100svh - 200px) / 1.42)); width: var(--pw); }
   .pp-base--right { left: 0; }
   .pp-base--left { display: none; }
   .leaf { left: 0; }
@@ -569,18 +572,19 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
     margin: 0 calc(var(--gutter) * -1); padding: 0 var(--gutter); scroll-padding-inline: var(--gutter);
   }
   .dlist::-webkit-scrollbar { display: none; }
-  .drow { position: relative; display: block; flex: none; width: 78vw; max-width: 360px; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; scroll-snap-align: start; }
+  /* one big card per swipe; a sliver of the next one shows at the edge */
+  .drow { position: relative; display: block; flex: none; width: calc(100vw - 2 * var(--gutter) - 26px); max-width: 520px; aspect-ratio: 3 / 4.3; border-radius: 22px; overflow: hidden; scroll-snap-align: start; }
   .drow__media { position: absolute; inset: 0; aspect-ratio: auto; border-radius: 0; }
   .drow__media .tag { display: none; }
-  .drow__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(12,9,6,.78) 0%, rgba(12,9,6,.12) 45%, transparent 60%); }
-  .drow__body { position: absolute; left: 18px; right: 18px; bottom: 16px; color: #fff; }
+  .drow__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(12,9,6,.85) 0%, rgba(12,9,6,.35) 38%, transparent 62%); }
+  .drow__body { position: absolute; left: 22px; right: 22px; bottom: 20px; color: #fff; }
   .drow__meta { color: rgba(255,255,255,.8); }
-  .drow__meta span + span, .drow__text { display: none; }
-  .drow__name { font-size: clamp(44px, 13vw, 56px); margin: 6px 0 10px; }
-  .dest__facts { display: flex; gap: 14px; padding-top: 10px; border-top-color: rgba(255,255,255,.3); }
-  .dest__facts span, .dest__facts li:nth-child(-n+2) { display: none; }
-  .dest__facts b { font-size: 14px; font-weight: 500; }
-  .dest__facts li:nth-child(4) b::before { content: "·\00a0\00a0"; opacity: .6; }
+  .drow__name { font-size: clamp(56px, 17vw, 80px); margin: 8px 0 10px; }
+  .drow__text { color: rgba(255,255,255,.86); font-size: 14.5px; line-height: 1.45; margin: 0 0 16px; }
+  .dest__facts { display: flex; flex-wrap: wrap; gap: 6px 14px; padding-top: 12px; border-top-color: rgba(255,255,255,.3); }
+  .dest__facts span, .dest__facts li:nth-child(2) { display: none; }
+  .dest__facts b { font-size: 15px; font-weight: 500; }
+  .dest__facts li:nth-child(n+3) b::before { content: "·\00a0\00a0"; opacity: .6; }
   .dests__outro { grid-template-columns: 1fr; row-gap: 24px; }
   .dests__outro .btn { grid-column: 1; grid-row: auto; justify-self: start; }
 }
@@ -898,3 +902,8 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .manifesto .w { opacity: 1; }
 }
+
+/* "Swipe →" above the destination row, phones only */
+.swipe-hint { display: none; margin: 0 0 14px; color: var(--ink-soft); }
+.swipe-hint i { font-style: normal; }
+@media (max-width: 900px) { .swipe-hint { display: block; } }

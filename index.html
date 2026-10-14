@@ -199,10 +199,15 @@
       <div class="why" id="why">
         <div class="why__head">
           <h2 class="why__title">Why travel <em>with us?</em></h2>
-          <p class="why__hint mono">Scroll to turn the pages <i>↓</i></p>
+          <p class="why__hint mono">Swipe the passport or use the arrows</p>
         </div>
         <div class="passport" id="passport">
           <div class="passport__book" id="ppBook"></div>
+        </div>
+        <div class="pp-ctrl">
+          <button class="pp-ctrl__btn" id="ppPrev" type="button" aria-label="Previous page" disabled>←</button>
+          <span class="pp-ctrl__count mono" id="ppCount" aria-live="polite">Cover</span>
+          <button class="pp-ctrl__btn" id="ppNext" type="button" aria-label="Next page">→</button>
         </div>
 
         <!-- passport pages, in reading order; main.js binds them into a book -->
@@ -338,10 +343,11 @@
             <p>Hand-picked by our crew, refined by thousands of journeys. Local time is live — somewhere it’s already golden hour.</p>
       </div>
 
+      <p class="swipe-hint mono" aria-hidden="true">Swipe <i>→</i></p>
       <ol class="dlist">
         <li class="drow">
           <div class="drow__media">
-            <img src="assets/img/w/tokyo-1280.webp" srcset="assets/img/w/tokyo-800.webp 800w, assets/img/w/tokyo-1280.webp 1280w, assets/img/w/tokyo-1920.webp 1920w" sizes="(max-width: 900px) 78vw, 46vw" alt="Neon-lit street in Shinjuku, Tokyo at night" loading="lazy" decoding="async">
+            <img src="assets/img/w/tokyo-1280.webp" srcset="assets/img/w/tokyo-800.webp 800w, assets/img/w/tokyo-1280.webp 1280w, assets/img/w/tokyo-1920.webp 1920w" sizes="(max-width: 900px) 92vw, 46vw" alt="Neon-lit street in Shinjuku, Tokyo at night" loading="lazy" decoding="async">
             <div class="tag"><span class="tag__hole"></span><img class="flag" src="assets/img/flags/jp.svg" alt="Flag of Japan" loading="lazy"><b>HND</b><small>Japan</small></div>
           </div>
           <div class="drow__body">
@@ -358,7 +364,7 @@
         </li>
         <li class="drow">
           <div class="drow__media" style="--focus:30% 50%">
-            <img src="assets/img/w/paris-1280.webp" srcset="assets/img/w/paris-800.webp 800w, assets/img/w/paris-1280.webp 1280w, assets/img/w/paris-1920.webp 1920w" sizes="(max-width: 900px) 78vw, 46vw" alt="Eiffel Tower over Paris rooftops at sunset" loading="lazy" decoding="async">
+            <img src="assets/img/w/paris-1280.webp" srcset="assets/img/w/paris-800.webp 800w, assets/img/w/paris-1280.webp 1280w, assets/img/w/paris-1920.webp 1920w" sizes="(max-width: 900px) 92vw, 46vw" alt="Eiffel Tower over Paris rooftops at sunset" loading="lazy" decoding="async">
             <div class="tag"><span class="tag__hole"></span><img class="flag" src="assets/img/flags/fr.svg" alt="Flag of France" loading="lazy"><b>CDG</b><small>France</small></div>
           </div>
           <div class="drow__body">
@@ -375,7 +381,7 @@
         </li>
         <li class="drow">
           <div class="drow__media">
-            <img src="assets/img/w/bali-1280.webp" srcset="assets/img/w/bali-800.webp 800w, assets/img/w/bali-1280.webp 1280w, assets/img/w/bali-1920.webp 1920w" sizes="(max-width: 900px) 78vw, 46vw" alt="Tegallalang rice terraces in Bali" loading="lazy" decoding="async">
+            <img src="assets/img/w/bali-1280.webp" srcset="assets/img/w/bali-800.webp 800w, assets/img/w/bali-1280.webp 1280w, assets/img/w/bali-1920.webp 1920w" sizes="(max-width: 900px) 92vw, 46vw" alt="Tegallalang rice terraces in Bali" loading="lazy" decoding="async">
             <div class="tag"><span class="tag__hole"></span><img class="flag" src="assets/img/flags/id.svg" alt="Flag of Indonesia" loading="lazy"><b>DPS</b><small>Indonesia</small></div>
           </div>
           <div class="drow__body">
@@ -392,7 +398,7 @@
         </li>
         <li class="drow">
           <div class="drow__media" style="--focus:18% 50%">
-            <img src="assets/img/w/santorini-1280.webp" srcset="assets/img/w/santorini-800.webp 800w, assets/img/w/santorini-1280.webp 1280w, assets/img/w/santorini-1920.webp 1920w" sizes="(max-width: 900px) 78vw, 46vw" alt="White bell tower overlooking the Santorini caldera" loading="lazy" decoding="async">
+            <img src="assets/img/w/santorini-1280.webp" srcset="assets/img/w/santorini-800.webp 800w, assets/img/w/santorini-1280.webp 1280w, assets/img/w/santorini-1920.webp 1920w" sizes="(max-width: 900px) 92vw, 46vw" alt="White bell tower overlooking the Santorini caldera" loading="lazy" decoding="async">
             <div class="tag"><span class="tag__hole"></span><img class="flag" src="assets/img/flags/gr.svg" alt="Flag of Greece" loading="lazy"><b>JTR</b><small>Greece</small></div>
           </div>
           <div class="drow__body">
@@ -409,7 +415,7 @@
         </li>
         <li class="drow">
           <div class="drow__media" style="--focus:62% 50%">
-            <img src="assets/img/w/tuscany-1280.webp" srcset="assets/img/w/tuscany-800.webp 800w, assets/img/w/tuscany-1280.webp 1280w, assets/img/w/tuscany-1920.webp 1920w" sizes="(max-width: 900px) 78vw, 46vw" alt="Vineyards and cypress trees in the Tuscan hills" loading="lazy" decoding="async">
+            <img src="assets/img/w/tuscany-1280.webp" srcset="assets/img/w/tuscany-800.webp 800w, assets/img/w/tuscany-1280.webp 1280w, assets/img/w/tuscany-1920.webp 1920w" sizes="(max-width: 900px) 92vw, 46vw" alt="Vineyards and cypress trees in the Tuscan hills" loading="lazy" decoding="async">
             <div class="tag"><span class="tag__hole"></span><img class="flag" src="assets/img/flags/it.svg" alt="Flag of Italy" loading="lazy"><b>FLR</b><small>Italy</small></div>
           </div>
           <div class="drow__body">

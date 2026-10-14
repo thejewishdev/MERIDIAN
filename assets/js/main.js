@@ -194,6 +194,9 @@
   /* =========================================================
      SCROLL-DRIVEN SCENES
      ========================================================= */
+  // passport turner; set up in initScenes for the current layout (laptop spread / phone single pages)
+  let ppGo = null;
+
   function initScenes() {
     if (!hasGSAP) return;
     // anticipatePin pins a little early to hide the lag between native (threaded) scrolling and the pin
@@ -281,7 +284,7 @@
       });
     });
 
-    // --- Why us: a passport whose pages turn as you scroll
+    // --- Why us: a passport you open and leaf through (swipe it, or use the arrows); scrolling never turns the pages
     const ppHolder = $('#ppFaces');
     const ppFaces = $$('.pp-face', ppHolder);
     const book = $('#ppBook');
@@ -313,15 +316,11 @@
       gsap.set(inks(book), { opacity: 0, scale: 2.4, force3D: false });
       if (spread) gsap.set(book, { xPercent: -25 }); // closed passport sits centred
 
+      // the whole book as one paused timeline; each click plays it forward or back to the next resting point
       const flips = leaves.length - 1;
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          // a little more scroll per page and a softer scrub, so one trackpad flick can't fling the cover open
-          trigger: '#why', start: 'top top', pin: true, scrub: 1.2, anticipatePin: pinAhead,
-          end: () => '+=' + innerHeight * (spread ? 4.2 : flips * .75)
-        }
-      });
-      let t = .25;
+      const tl = gsap.timeline({ paused: true });
+      const rests = [0];
+      let t = 0;
       leaves.slice(0, flips).forEach((leaf, i) => {
         const [shadeF, shadeB] = $$('.leaf__shade', leaf);
         // each shade only exists while its own face is towards the viewer and it has something to show
@@ -367,21 +366,37 @@
         // stamp whatever pages this flip uncovers
         const shown = spread ? [leaf.children[1], leaves[i + 1].children[0]] : [leaves[i + 1].children[0]];
         const marks = shown.flatMap(inks);
-        if (marks.length) {
-          tl.to(marks, { opacity: 1, scale: 1, duration: .28, stagger: .18, ease: 'power4.in', force3D: false }, t + .95);
-        }
-        t += 1.7;
+        if (marks.length) tl.to(marks, { opacity: 1, scale: 1, duration: .28, stagger: .18, ease: 'power4.in', force3D: false }, t + .95);
+        // rest once this page and its stamps have landed; the next turn starts from there
+        t = tl.duration();
+        rests.push(t);
       });
-      tl.to({}, { duration: .5 }); // linger on the last spread
+
+      let page = 0, tween = null;
+      const prev = $('#ppPrev'), next = $('#ppNext'), count = $('#ppCount');
+      const sync = () => {
+        prev.disabled = page === 0;
+        next.disabled = page === rests.length - 1;
+        count.textContent = page === 0 ? 'Cover' : `Page ${page} / ${rests.length - 1}`;
+      };
+      ppGo = n => {
+        page = Math.max(0, Math.min(rests.length - 1, n));
+        tween && tween.kill();
+        // a turn takes about a second whichever way, and never stacks up if clicked fast
+        tween = tl.tweenTo(rests[page], { duration: Math.min(1.6, Math.max(.5, Math.abs(tl.time() - rests[page]) * .8)), ease: 'none' });
+        sync();
+      };
+      ppGo.page = () => page;
+      sync();
 
       return () => {
+        tween && tween.kill(); tl.kill(); ppGo = null;
         ppFaces.forEach(f => ppHolder.appendChild(f));
         book.innerHTML = '';
         gsap.set(book, { clearProps: 'all' });
         gsap.set(inks(ppHolder), { clearProps: 'all' });
       };
     });
-
     // --- Section headings reveal
     $$('.chapter').forEach(ch => gsap.from(ch.children, { y: 20, opacity: 0, stagger: .1, duration: .9, ease: 'expo.out', scrollTrigger: { trigger: ch, start: 'top 88%' } }));
     $$('.exp__title, .postcards__intro h2, .arrival__title').forEach(h =>
@@ -397,6 +412,34 @@
     gsap.from('.pass-wrap', { y: 120, rotate: -3, opacity: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.pass-wrap', start: 'top 90%' } });
     gsap.from('.footer__word', { yPercent: 40, opacity: 0, duration: 1.6, ease: 'expo.out', scrollTrigger: { trigger: '.footer', start: 'top 85%' } });
   }
+
+  /* =========================================================
+     PASSPORT CONTROLS — arrows, or a sideways swipe on the passport (finger, or two fingers on a trackpad).
+     Nothing here listens to page scrolling; vertical scrolling over the passport stays native.
+     ========================================================= */
+  $('#ppPrev').addEventListener('click', () => ppGo && ppGo(ppGo.page() - 1));
+  $('#ppNext').addEventListener('click', () => ppGo && ppGo(ppGo.page() + 1));
+  const passportEl = $('#passport');
+  // touch / pen / mouse drag: a mostly horizontal move of 40px or more turns one page
+  let sx = 0, sy = 0, tracking = false;
+  passportEl.addEventListener('pointerdown', e => { tracking = true; sx = e.clientX; sy = e.clientY; });
+  passportEl.addEventListener('pointerup', e => {
+    if (!tracking || !ppGo) return; tracking = false;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) ppGo(ppGo.page() + (dx < 0 ? 1 : -1));
+  });
+  passportEl.addEventListener('pointercancel', () => { tracking = false; });
+  // trackpad: a sideways two-finger swipe arrives as wheel events with deltaX; one gesture turns one page.
+  // passive, so it can never hold up scrolling
+  let wx = 0, wheelLock = false, wheelIdle = 0;
+  passportEl.addEventListener('wheel', e => {
+    if (!ppGo || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    clearTimeout(wheelIdle);
+    wheelIdle = setTimeout(() => { wheelLock = false; wx = 0; }, 180); // gesture (and its momentum) over
+    if (wheelLock) return;
+    wx += e.deltaX;
+    if (Math.abs(wx) > 60) { wheelLock = true; ppGo(ppGo.page() + (wx > 0 ? 1 : -1)); }
+  }, { passive: true });
 
   /* =========================================================
      FLIGHT RAIL + ODOMETER
