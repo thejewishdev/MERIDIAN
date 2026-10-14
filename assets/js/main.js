@@ -523,26 +523,6 @@
   updateTimes(); setInterval(updateTimes, 15000);
 
   /* =========================================================
-     DESTINATION CARD TILT
-     ========================================================= */
-  if (finePointer && hasGSAP) {
-    $$('.dest').forEach(card => {
-      const rx = gsap.quickTo(card, 'rotationX', { duration: .6, ease: 'power3' });
-      const ry = gsap.quickTo(card, 'rotationY', { duration: .6, ease: 'power3' });
-      gsap.set(card, { transformPerspective: 1400 });
-      // measured once per hover (the track is still while the pointer moves over a card), not on every move
-      let b = null;
-      card.addEventListener('pointerenter', () => { b = card.getBoundingClientRect(); });
-      card.addEventListener('pointermove', e => {
-        if (!b) b = card.getBoundingClientRect();
-        ry(((e.clientX - b.left) / b.width - .5) * 8);
-        rx(-((e.clientY - b.top) / b.height - .5) * 6);
-      });
-      card.addEventListener('pointerleave', () => { b = null; rx(0); ry(0); });
-    });
-  }
-
-  /* =========================================================
      PHOTO WARM-UP — decode every section photo (off the main thread) during idle
      time after load, one at a time, so none decodes while its section scrolls in
      ========================================================= */
