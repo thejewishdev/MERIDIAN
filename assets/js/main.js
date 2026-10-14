@@ -67,7 +67,7 @@
     // creep towards 90% while waiting; finishLoading jumps to 100
     shownPct += (90 - shownPct) * .04;
     $('#loaderPct').textContent = Math.round(shownPct);
-    $('#loaderBar').style.width = shownPct + '%';
+    $('#loaderBar').style.transform = `scaleX(${shownPct / 100})`; // a transform, not width: no layout per frame while the photo decodes
     requestAnimationFrame(tick);
   })();
 
@@ -77,7 +77,7 @@
     clearInterval(boardTimer);
     setBoard('BON VOYAGE');
     $('#loaderPct').textContent = '100';
-    $('#loaderBar').style.width = '100%';
+    $('#loaderBar').style.transform = 'scaleX(1)';
     requestAnimationFrame(() => {
       document.body.classList.remove('is-loading');
       if (hasGSAP) {
@@ -681,23 +681,9 @@
   });
 
   /* =========================================================
-     CURSOR + MAGNETIC BUTTONS
+     MAGNETIC BUTTONS + HERO DRIFT
      ========================================================= */
   if (finePointer && hasGSAP) {
-    const cur = $('#cursor'), label = $('#cursorLabel');
-    const cx = gsap.quickTo(cur, 'x', { duration: .25, ease: 'power3' });
-    const cy = gsap.quickTo(cur, 'y', { duration: .25, ease: 'power3' });
-    addEventListener('pointermove', e => { cx(e.clientX); cy(e.clientY); cur.classList.add('is-visible'); });
-    document.addEventListener('pointerleave', () => cur.classList.remove('is-visible'));
-    document.addEventListener('pointerover', e => {
-      const lab = e.target.closest('[data-cursor]');
-      const act = e.target.closest('.act.is-open');
-      const hov = e.target.closest('a, button, select, input, .globe');
-      if (lab && !act) { cur.classList.add('is-label'); label.textContent = lab.dataset.cursor; }
-      else cur.classList.remove('is-label');
-      cur.classList.toggle('is-hover', !!hov && !(lab && !act));
-    });
-
     $$('[data-magnetic]').forEach(btn => {
       const mx = gsap.quickTo(btn, 'x', { duration: .5, ease: 'elastic.out(1, .4)' });
       const my = gsap.quickTo(btn, 'y', { duration: .5, ease: 'elastic.out(1, .4)' });

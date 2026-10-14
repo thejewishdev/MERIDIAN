@@ -119,26 +119,8 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 .flap.is-flipping { animation: flap .09s linear; }
 @keyframes flap { 50% { transform: scaleY(.6); filter: brightness(.6); } }
 .loader__bar { height: 2px; background: #2b2825; overflow: hidden; }
-.loader__bar i { display: block; height: 100%; width: 0; background: var(--sun); transition: width .3s; }
+.loader__bar i { display: block; height: 100%; background: var(--sun); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
 
-/* ---------- Custom cursor ---------- */
-.cursor {
-  position: fixed; left: 0; top: 0; z-index: 900;
-  width: 14px; height: 14px; margin: -7px 0 0 -7px;
-  border-radius: 50%;
-  background: #fff;
-  mix-blend-mode: difference;
-  pointer-events: none;
-  display: grid; place-items: center;
-  transition: width .4s var(--ease-out), height .4s var(--ease-out), margin .4s var(--ease-out), background .3s;
-  opacity: 0;
-}
-.cursor.is-visible { opacity: 1; }
-.cursor.is-hover { width: 56px; height: 56px; margin: -28px 0 0 -28px; }
-.cursor.is-label { width: 96px; height: 96px; margin: -48px 0 0 -48px; mix-blend-mode: normal; background: var(--sun); }
-.cursor__label { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #fff; opacity: 0; transition: opacity .2s; }
-.cursor.is-label .cursor__label { opacity: 1; }
-@media (hover: none), (pointer: coarse) { .cursor { display: none; } }
 
 /* ---------- Nav ----------
    Colour follows the section underneath (.on-dark is toggled from JS).
@@ -915,7 +897,16 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 .footer__top a:hover { color: var(--sun); }
 @media (max-width: 700px) { .footer__top { grid-template-columns: 1fr 1fr; } .footer__top > div { grid-column: 1 / -1; } }
 .footer__word { font-family: var(--serif); font-size: 23.5vw; line-height: .8; letter-spacing: -.05em; margin: 40px 0 10px -1vw; white-space: nowrap; background: linear-gradient(180deg, var(--paper) 30%, rgba(243,237,226,.08)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.footer__bottom { display: flex; justify-content: space-between; color: rgba(243,237,226,.45); }
+.footer__bottom { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; color: rgba(243,237,226,.45); }
+/* author credit: the ELIS2code wordmark, set in live type so it stays crisp and costs no download */
+.credit { display: inline-flex; align-items: center; gap: 10px; color: inherit; transition: color .3s; }
+.credit:hover { color: var(--paper); }
+.credit__logo { font-family: var(--sans); font-size: 17px; font-weight: 700; letter-spacing: -.02em; text-transform: none; color: #ecebf5; }
+.credit__logo i { font-style: normal; color: #ee4466; }
+.credit__logo span { font-weight: 400; letter-spacing: 0; }
+.credit__logo u { text-decoration: none; margin-left: 2px; }
+.credit:hover .credit__logo u { animation: blink 1s steps(1) infinite; }
+@media (max-width: 700px) { .footer__bottom { flex-direction: column; gap: 10px; text-align: center; } .credit { order: -1; margin-bottom: 6px; } }
 
 
 /* =========================================================
