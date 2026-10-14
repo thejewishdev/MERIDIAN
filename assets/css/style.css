@@ -50,7 +50,7 @@ body {
 body.is-loading { overflow: hidden; }
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
-a, button, select, input, .act, .card, .globe { -webkit-tap-highlight-color: transparent; }
+a, button, select, input, .card, .globe { -webkit-tap-highlight-color: transparent; }
 button, a, select { touch-action: manipulation; }
 button, input, select { font: inherit; color: inherit; }
 em { font-family: var(--serif); font-style: italic; font-weight: 400; }
@@ -513,190 +513,113 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 }
 
 /* =========================================================
-   02 · DESTINATIONS (horizontal)
+   02 · DESTINATIONS — an editorial list: one row per place, the photo alternating left / right.
+   Photos sit still in the page and scroll natively; each row fades in once (main.js)
    ========================================================= */
-.dests { position: relative; background: var(--paper-2); }
-.dests__pin { position: relative; height: 100vh; height: 100svh; overflow: hidden; display: flex; align-items: center; }
-.dests__track { display: flex; align-items: center; gap: clamp(24px, 3vw, 48px); padding: 0 var(--gutter) 0 calc(var(--gutter) + 40px); will-change: transform; }
-.dests__intro { flex: none; width: min(460px, 80vw); }
+.dests { position: relative; background: var(--paper-2); padding: clamp(90px, 12vw, 160px) var(--gutter) clamp(90px, 10vw, 140px) calc(var(--gutter) + 40px); }
+@media (max-width: 900px) { .dests { padding-left: var(--gutter); } }
+.dests__intro { max-width: 760px; margin-bottom: clamp(56px, 8vw, 110px); }
 .dests__intro h2 { font-family: var(--serif); font-size: clamp(48px, 5.6vw, 92px); line-height: .92; letter-spacing: -.02em; margin-bottom: 22px; }
 .dests__intro h2 em { color: var(--sun); }
-.dests__intro p { color: var(--ink-soft); max-width: 34ch; }
-.dests__hint { display: inline-flex; gap: 10px; margin-top: 18px; }
-.dests__hint i { font-style: normal; animation: nudge 1.4s var(--ease) infinite; }
-@keyframes nudge { 50% { transform: translateX(8px); } }
+.dests__intro p { color: var(--ink-soft); max-width: 44ch; margin: 0; }
 
-.dest {
-  flex: none; position: relative;
-  width: min(62vw, 980px); height: min(76vh, 720px);
-  border-radius: 26px; overflow: hidden;
-  color: #fff;
-  box-shadow: 0 40px 80px -30px rgba(40,25,10,.45);
-}
-.dest__media { position: absolute; inset: 0; overflow: hidden; }
-.dest__media img { position: absolute; top: 0; left: -12%; width: 124%; max-width: none; height: 100%; object-fit: cover; will-change: transform; }
-.dest::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.25) 0%, transparent 30%, transparent 45%, rgba(0,0,0,.78) 100%); pointer-events: none; }
-.dest__num { position: absolute; top: 26px; left: 28px; z-index: 2; }
-.dest__info { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 28px 26px; z-index: 2; }
-.dest__coord { opacity: .75; }
-.dest__name { font-family: var(--serif); font-size: clamp(72px, 10vw, 170px); line-height: .82; letter-spacing: -.035em; margin: 6px 0 14px -4px; }
-.dest__info p { max-width: 44ch; margin: 0 0 20px; color: rgba(255,255,255,.85); }
-.dest__facts { list-style: none; margin: 0; padding: 14px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid rgba(255,255,255,.25); }
+.dlist { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(70px, 9vw, 130px); }
+.drow { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(30px, 5vw, 90px); align-items: center; }
+.drow:nth-child(even) .drow__media { order: 2; }
+.drow__media { position: relative; aspect-ratio: 4 / 3; border-radius: 22px; overflow: hidden; background: #d9cfbf; }
+.drow__media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: var(--focus, 50% 50%); }
+.drow__meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; color: var(--ink-soft); }
+.drow__name { font-family: var(--serif); font-size: clamp(64px, 7.4vw, 128px); line-height: .84; letter-spacing: -.035em; margin: 16px 0 20px -4px; }
+.drow__text { color: var(--ink-soft); font-size: 17px; max-width: 42ch; margin: 0 0 28px; }
+.dest__facts { list-style: none; margin: 0; padding: 16px 0 0; display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 12px 34px; border-top: 1px solid var(--line); }
 .dest__facts li { display: flex; flex-direction: column; gap: 2px; }
-.dest__facts span { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .6; }
-.dest__facts b { font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; }
-.dest__facts b[data-tz]::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #4dff8a; margin-right: 8px; vertical-align: 2px; animation: live 1.6s ease-in-out infinite; }
+.dest__facts span { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+.dest__facts b { font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dest__facts b[data-tz]::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #2fbf63; margin-right: 8px; vertical-align: 2px; animation: live 1.6s ease-in-out infinite; }
 @keyframes live { 50% { opacity: .35; } }
 
-/* luggage tag */
+/* luggage tag hanging off the photo (static) */
 .tag {
-  position: absolute; top: -6px; right: 34px; z-index: 3;
+  position: absolute; top: -6px; right: 28px; z-index: 3;
   width: 96px; padding: 34px 10px 14px;
   background: var(--cream); color: var(--ink);
   border-radius: 0 0 14px 14px;
   clip-path: polygon(22% 0, 78% 0, 100% 14%, 100% 100%, 0 100%, 0 14%);
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  transform-origin: 50% 0;
-  transform: rotate(-2deg); /* hangs at a slight angle; static */
-  box-shadow: 0 10px 20px rgba(0,0,0,.2);
+  transform-origin: 50% 0; transform: rotate(-2deg);
 }
 .tag__hole { position: absolute; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: rgba(0,0,0,.6); box-shadow: inset 0 0 0 3px #d8cbb5; }
 .tag .flag { width: 54px; height: 36px; border-radius: 3px; }
 .tag b { font-family: var(--mono); font-size: 22px; letter-spacing: .06em; line-height: 1; }
 .tag small { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
 
-.dests__outro { flex: none; width: min(440px, 80vw); padding-left: 20px; }
-.dests__outro h3 { font-family: var(--serif); font-size: clamp(44px, 4.6vw, 76px); line-height: .95; margin: 14px 0 28px; }
+.dests__outro { display: grid; grid-template-columns: 1fr auto; align-items: end; column-gap: 30px; margin-top: clamp(80px, 10vw, 140px); padding-top: 40px; border-top: 1px solid var(--line); }
+.dests__outro p { margin: 0; color: var(--ink-soft); }
+.dests__outro h3 { grid-column: 1; font-family: var(--serif); font-size: clamp(40px, 4.4vw, 72px); line-height: .95; margin: 12px 0 0; }
 .dests__outro h3 em { color: var(--sun); }
-.dests__progress { position: absolute; left: calc(var(--gutter) + 40px); right: var(--gutter); bottom: 34px; height: 2px; background: var(--line); }
-.dests__progress i { display: block; height: 100%; width: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; }
+.dests__outro .btn { grid-column: 2; grid-row: 1 / span 2; }
 
 @media (max-width: 900px) {
-  /* phones: intro → swipeable card carousel → outro */
-  .dests { padding: 90px 0 70px; }
-  .dests__intro, .dests__outro { width: auto; padding: 0 var(--gutter); }
-  .dests__intro h2 { font-size: clamp(44px, 12vw, 64px); }
-  .dests__hint { display: none; }
-  .dests__pin { height: auto; display: block; margin-top: 30px; overflow: visible; }
-  .dests__track {
-    gap: 14px; padding: 8px var(--gutter) 24px;
-    overflow-x: auto; overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter);
-    scrollbar-width: none; -webkit-overflow-scrolling: touch;
-    will-change: auto;
-  }
-  .dests__track::-webkit-scrollbar { display: none; }
-  .dests__track { align-items: stretch; }
-  .dest { width: 84vw; max-width: 420px; height: auto; display: flex; flex-direction: column; background: #16130f; border-radius: 22px; scroll-snap-align: start; box-shadow: 0 24px 40px -24px rgba(40,25,10,.5); }
-  .dest::after { display: none; }
-  .dest__media { position: relative; inset: auto; flex: none; aspect-ratio: 1 / 1; }
-  .dest__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, transparent 26%, transparent 60%, #16130f 100%); }
-  .dest__media img { left: 0; width: 100%; object-position: var(--focus, 50% 50%); will-change: auto; }
-  .dest__info { position: relative; flex: 1; display: flex; flex-direction: column; margin-top: -58px; }
-  .dest__facts { margin-top: auto; }
-  .dest__num { top: 20px; left: 20px; }
-  .dest__info { padding: 0 20px 20px; }
-  .dest__name { font-size: clamp(56px, 16vw, 76px); margin-bottom: 10px; }
-  .dest__info p { font-size: 14px; line-height: 1.45; margin-bottom: 16px; }
-  .dest__facts { grid-template-columns: 1fr 1fr; gap: 10px 12px; padding-top: 12px; }
+  .drow { grid-template-columns: 1fr; gap: 24px; }
+  .drow:nth-child(even) .drow__media { order: 0; }
+  .drow__name { font-size: clamp(56px, 16vw, 84px); margin: 12px 0 14px; }
+  .drow__text { font-size: 15px; margin-bottom: 22px; }
+  .dest__facts { grid-template-columns: 1fr 1fr; gap: 12px 16px; }
   .dest__facts b { font-size: 15px; }
   .tag { right: 16px; width: 74px; padding: 30px 8px 10px; } .tag .flag { width: 40px; height: 27px; } .tag b { font-size: 16px; }
-  .dests__progress { display: none; }
-  .dests__dots { display: flex; justify-content: center; gap: 8px; }
-  .dests__dots i { width: 6px; height: 6px; border-radius: 6px; background: rgba(21,18,15,.2); transition: width .4s var(--ease), background .4s; }
-  .dests__dots i.is-on { width: 26px; background: var(--sun); }
-  .dests__outro { margin-top: 50px; }
+  .dests__outro { grid-template-columns: 1fr; row-gap: 24px; }
+  .dests__outro .btn { grid-column: 1; grid-row: auto; justify-self: start; }
 }
 
 /* =========================================================
-   03 · EXPERIENCES
+   03 · EXPERIENCES — four portrait cards side by side. Static: photos sit still and scroll natively,
+   nothing reacts to hover or scrolling (the row fades in once, from main.js)
    ========================================================= */
 .exp { background: var(--sea); color: #f3ede2; padding: clamp(90px, 12vw, 160px) var(--gutter) clamp(90px, 10vw, 140px) calc(var(--gutter) + 40px); position: relative; overflow: hidden; }
 @media (max-width: 900px) { .exp { padding-left: var(--gutter); } }
 .exp::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 50% at 80% 0%, rgba(26,163,201,.25), transparent 70%), radial-gradient(50% 40% at 0% 100%, rgba(255,91,35,.14), transparent 70%); pointer-events: none; }
-.exp__title { position: relative; font-family: var(--serif); font-size: clamp(44px, 6.4vw, 108px); line-height: .94; letter-spacing: -.02em; max-width: 14ch; margin-bottom: clamp(40px, 6vw, 80px); }
+.exp__title { position: relative; font-family: var(--serif); font-size: clamp(44px, 6.4vw, 108px); line-height: .94; letter-spacing: -.02em; max-width: 14ch; margin-bottom: clamp(40px, 6vw, 72px); }
 .exp__title em { color: #7fd6ef; }
 
-.acts { position: relative; display: flex; gap: 14px; height: min(82vh, 760px); container-type: inline-size; }
-.act {
-  position: relative; flex: 1; min-width: 0;
-  border-radius: 24px; overflow: hidden; cursor: pointer;
-  transition: flex 1s var(--ease);
-  contain: layout paint;
-}
-.act.is-open { flex: 5; cursor: default; }
-/* Sized like an open panel (4 cards, 3 gaps of 14px, open = 5/8 of the rest) and centred with plain positioning.
-   Centring with the `translate` property broke in Safari: its accelerated scale animation kept a stale offset while
-   the panel resized, so the photo appeared shoved right with a gap, then slid into place.
-   No CSS filter either (closed panels are dimmed by their veil): Safari re-filtered three large photos on every
-   frame of the panel resize. max-width: none matters: the global img { max-width: 100% } used to squeeze each photo
-   to its panel's current width, so every photo was re-scaled on every frame of the resize. */
-.act > img { position: absolute; top: 0; left: calc(50% - (100cqw - 42px) * 5 / 16); width: calc((100cqw - 42px) * 5 / 8); max-width: none; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease); transform: scale(1.15); }
-.act.is-open > img { transform: scale(1); }
-.act__veil { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(5,20,28,.88) 0%, rgba(5,20,28,.55) 22%, transparent 48%); }
-.act:not(.is-open) .act__veil { background: color-mix(in srgb, var(--hue) 35%, rgba(5,20,28,.6)); }
-/* (no will-change here: inside these rounded, resizing panels Safari clips separately composited photos at the
-   panel's old size, so photos vanished or appeared cut off mid-resize) */
-.act__spine { position: absolute; inset: 24px 0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; transition: opacity .4s; }
-.act__spine b { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--serif); font-weight: 400; font-size: clamp(34px, 3.4vw, 54px); letter-spacing: -.01em; }
-.act__spine .flag { width: 34px; height: 23px; border-radius: 3px; }
-.act.is-open .act__spine { opacity: 0; pointer-events: none; }
-.act__body {
-  position: absolute; left: clamp(18px, 2.4vw, 32px); bottom: clamp(16px, 2.2vw, 28px);
-  /* a fixed width (based on the open panel, not the animating one): the text is laid out once, never mid-resize */
-  width: min(520px, calc((100cqw - 42px) * 5 / 8 - 36px));
-  text-shadow: 0 1px 12px rgba(0,0,0,.35);
-  opacity: 0; transform: translateY(30px); transition: opacity .4s, transform .6s var(--ease-out); pointer-events: none;
-}
-.act.is-open .act__body { opacity: 1; transform: none; transition-delay: .45s; pointer-events: auto; }
-.act__best { display: inline-flex; padding: 3px 8px; border-radius: 100px; background: var(--hue); color: #fff; font-size: 8.5px; text-shadow: none; }
-.act__body h3 { font-family: var(--serif); font-size: clamp(24px, 2.2vw, 34px); line-height: 1; margin: 8px 0 6px; letter-spacing: -.015em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.act__body h3 .flag--lg { width: 26px; height: 17px; border-radius: 3px; }
-.act__body h3 em { color: color-mix(in srgb, var(--hue) 55%, #fff); }
-.act__body p { max-width: 48ch; margin: 0 0 10px; font-size: 13.5px; line-height: 1.45; color: rgba(243,237,226,.86); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.act__stats { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 6px 26px; margin: 0 0 10px; padding: 8px 0 0; border-top: 1px solid rgba(255,255,255,.18); }
-.act__stats dt { font-family: var(--mono); font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase; opacity: .6; }
-.act__stats dd { margin: 1px 0 0; font-weight: 600; font-size: 13px; white-space: nowrap; }
+.xcards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 1.6vw, 24px); position: relative; }
+.xcard { display: flex; flex-direction: column; min-width: 0; }
+.xcard__media { position: relative; aspect-ratio: 3 / 4; border-radius: 20px; overflow: hidden; background: #06202b; }
+.xcard__media > img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: var(--focus, 50% 50%); }
+/* a soft scrim so the name reads over any photo */
+.xcard__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(5,20,28,.78) 0%, rgba(5,20,28,.2) 34%, transparent 55%); pointer-events: none; }
+.xcard__best { position: absolute; top: 14px; left: 14px; z-index: 1; padding: 3px 8px; border-radius: 100px; background: var(--hue); color: #fff; font-size: 8.5px; }
+.xcard__label { position: absolute; left: 18px; right: 18px; bottom: 16px; z-index: 1; margin: 0; display: flex; align-items: baseline; gap: 10px; color: #fff; }
+.xcard__label .mono { font-size: 10px; color: rgba(255,255,255,.7); }
+.xcard__label b { font-family: var(--serif); font-weight: 400; font-size: clamp(32px, 3.1vw, 52px); line-height: .9; letter-spacing: -.015em; }
+.xcard__body { padding: 18px 2px 0; flex: 1; display: flex; flex-direction: column; } /* stats line up across the row, whatever the text length */
+.xcard__body h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 1.8vw, 28px); line-height: 1.05; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.xcard__body h3 .flag--lg { width: 24px; height: 16px; border-radius: 2px; }
+.xcard__body h3 em { color: color-mix(in srgb, var(--hue) 55%, #fff); }
+.xcard__body p { margin: 0 0 14px; font-size: 14px; line-height: 1.5; color: rgba(243,237,226,.75); }
+.xcard__stats { margin-top: auto !important; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin: 0 0 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.16); }
+.xcard__stats dt { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; opacity: .6; }
+.xcard__stats dd { margin: 2px 0 0; font-weight: 600; font-size: 14px; white-space: nowrap; }
 .meter { display: flex; gap: 3px; padding-top: 6px; }
 .meter i { width: 11px; height: 6px; border-radius: 2px; background: rgba(255,255,255,.2); }
-.act.is-open .meter i { animation: meterOn .3s both; }
-.act.is-open .meter i:nth-child(1) { animation-delay: .7s; } .act.is-open .meter i:nth-child(2) { animation-delay: .8s; }
-.act.is-open .meter i:nth-child(3) { animation-delay: .9s; } .act.is-open .meter i:nth-child(4) { animation-delay: 1s; }
-.act.is-open .meter i:nth-child(5) { animation-delay: 1.1s; }
-.meter[style*="--v:1"] i:nth-child(n+2), .meter[style*="--v:2"] i:nth-child(n+3), .meter[style*="--v:3"] i:nth-child(n+4), .meter[style*="--v:4"] i:nth-child(n+5) { animation: none !important; }
-@keyframes meterOn { to { background: var(--sun); } }
-.act__also { margin: 0 !important; display: flex !important; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 8.5px !important; color: rgba(243,237,226,.7) !important; }
-.act__also span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-.act__also .flag { width: 16px; height: 11px; }
+.meter[style*="--v:1"] i:nth-child(-n+1), .meter[style*="--v:2"] i:nth-child(-n+2), .meter[style*="--v:3"] i:nth-child(-n+3),
+.meter[style*="--v:4"] i:nth-child(-n+4), .meter[style*="--v:5"] i:nth-child(-n+5) { background: var(--sun); }
+.xcard__body .xcard__also { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 9px; color: rgba(243,237,226,.6); }
+.xcard__also span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.xcard__also .flag { width: 16px; height: 11px; }
 
-@media (max-width: 900px) {
-  /* phones: a stack of strips, one opened. Nothing here changes layout while it animates —
-     every panel keeps the open height; it slides into place (transform) and a clip reveals
-     a 76px strip or the whole panel. --i is the panel's index, --o the open one's (set in main.js). */
-  .acts {
-    --open-h: min(78svh, 640px); --strip: 76px; --gap: 10px;
-    display: block; height: calc(var(--open-h) + 3 * (var(--strip) + var(--gap)));
-    contain: layout size;
-  }
-  .act {
-    position: absolute; left: 0; right: 0; top: 0; height: var(--open-h);
-    --after: clamp(0, var(--i, 0) - var(--o, 0), 1);
-    transform: translateY(calc(var(--i, 0) * (var(--strip) + var(--gap)) + var(--after) * (var(--open-h) - var(--strip))));
-    clip-path: inset(0 0 calc(var(--open-h) - var(--strip)) 0 round 18px);
-    transition: transform .9s var(--ease), clip-path .9s var(--ease);
-    will-change: transform, clip-path;
-  }
-  .act.is-open { clip-path: inset(0 0 0 0 round 18px); }
-  /* closed strips show the middle band of the photo, like before */
-  /* no filter transition on phones: animating a filter repaints the whole photo every frame */
-  /* one transform (offset + zoom) rather than `translate` + `transform` animating together: Safari's accelerated
-     animations can apply a stale offset when the two are mixed */
-  .act > img { left: 0; top: 0; width: 100%; height: 100%; transform: translateY(calc((var(--open-h) - var(--strip)) / -2)) scale(1.15); transition: transform 1s var(--ease); }
-  .act.is-open > img { transform: none; }
-  .act__spine { inset: 0 24px auto; height: var(--strip); flex-direction: row; }
-  .act__spine b { writing-mode: horizontal-tb; transform: none; font-size: 36px; }
-  .act__body { min-width: 0; left: 16px; right: 16px; bottom: 14px; width: auto; }
-  .act__stats { justify-content: space-between; gap: 6px 12px; }
+@media (max-width: 1100px) { .xcards { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 44px; } }
+@media (max-width: 560px) {
+  .xcards { gap: 28px 12px; }
+  .xcard__media { border-radius: 16px; }
+  .xcard__label { left: 12px; bottom: 12px; }
+  .xcard__label b { font-size: 26px; }
+  .xcard__best { top: 10px; left: 10px; }
+  .xcard__body { padding-top: 12px; }
+  .xcard__body h3 { font-size: 19px; }
+  .xcard__body p { font-size: 13px; }
+  .xcard__stats { gap: 8px 10px; }
+  .xcard__stats dd { font-size: 13px; }
+  .xcard__body .xcard__also { display: none; }
 }
 
 /* =========================================================
@@ -933,10 +856,6 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
   .stat span { font-size: 13px; }
 
   .exp__title { font-size: clamp(40px, 11vw, 60px); margin-bottom: 36px; }
-  .act { border-radius: 18px; }
-  .act__spine b { font-size: 30px; }
-  .act__body p { font-size: 13px; }
-  .act__veil { background: linear-gradient(0deg, rgba(5,20,28,.92) 0%, rgba(5,20,28,.6) 26%, transparent 52%); }
 
   .postcards { gap: 50px; }
   .postcards__intro h2 { font-size: clamp(40px, 11vw, 60px); }

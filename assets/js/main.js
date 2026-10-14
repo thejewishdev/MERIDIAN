@@ -387,56 +387,10 @@
     $$('.exp__title, .postcards__intro h2, .arrival__title').forEach(h =>
       gsap.from(h, { y: 60, opacity: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: h, start: 'top 85%' } }));
 
-    // --- Destinations: horizontal journey
-    mm.add('(min-width: 901px)', () => {
-      const track = $('#destsTrack');
-      const dist = () => track.scrollWidth - innerWidth;
-      const setBar = gsap.quickSetter('#destsBar', 'scaleX');
-      const tween = gsap.to(track, {
-        x: () => -dist(), ease: 'none',
-        scrollTrigger: {
-          // follow the (already smooth) native scroll directly: a scrub delay made the cards trail the page, so at
-          // the end of the pin the page was already moving down while the cards were still sliding
-          trigger: '#destsPin', start: 'top top', end: () => '+=' + dist(), pin: true, scrub: true, anticipatePin: pinAhead, invalidateOnRefresh: true,
-          onUpdate: s => setBar(s.progress)
-        }
-      });
-      $$('.dest').forEach(card => {
-        gsap.fromTo($('.dest__media img', card), { xPercent: -6 }, {
-          xPercent: 6, ease: 'none',
-          scrollTrigger: { trigger: card, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true }
-        });
-        gsap.fromTo($('.dest__name', card), { yPercent: 60, opacity: 0 }, {
-          yPercent: 0, opacity: 1, ease: 'expo.out', duration: 1.2,
-          scrollTrigger: { trigger: card, containerAnimation: tween, start: 'left 75%', toggleActions: 'play none none none' }
-        });
-      });
-    });
-    mm.add('(max-width: 900px)', () => {
-      const pin = $('#destsPin'), track = $('#destsTrack'), intro = $('.dests__intro'), outro = $('.dests__outro');
-      pin.before(intro); pin.after(outro);
-      const dots = document.createElement('div');
-      dots.className = 'dests__dots';
-      const cards = $$('.dest', track);
-      dots.innerHTML = cards.map(() => '<i></i>').join('');
-      pin.appendChild(dots);
-      const dotEls = $$('i', dots);
-      let raf = 0;
-      const onSwipe = () => {
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(() => {
-          const i = Math.round(track.scrollLeft / (cards[0].offsetWidth + 14));
-          dotEls.forEach((d, j) => d.classList.toggle('is-on', j === i));
-        });
-      };
-      track.addEventListener('scroll', onSwipe, { passive: true });
-      onSwipe();
-      gsap.from(cards, { x: 60, opacity: 0, stagger: .08, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: track, start: 'top 85%' } });
-      return () => {
-        track.removeEventListener('scroll', onSwipe);
-        track.prepend(intro); track.append(outro); dots.remove();
-      };
-    });
+    // --- Destinations: each row fades up once as it comes into view (time-based, not tied to the scroll)
+    $$('.drow').forEach(row => gsap.from(row, { y: 60, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: row, start: 'top 85%' } }));
+    // --- Experiences: the four cards fade up once, one after another
+    gsap.from('.xcard', { y: 60, opacity: 0, stagger: .1, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '.xcards', start: 'top 85%' } });
 
     // --- Postcard deck tilts in
     gsap.from('.deck', { rotate: 8, y: 120, opacity: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.deck', start: 'top 85%' } });
@@ -455,13 +409,14 @@
   const nav = $('#nav'), rail = $('#rail');
   // the km digits change on every scroll frame: edit the text node in place (the span is size-contained in CSS, so only it relays out)
   const odoText = odo.firstChild || odo.appendChild(document.createTextNode(''));
-  let railH = 0, stopTops = [], footerTop = Infinity, docMax = 1, heroEnd = 0, darkRanges = [], lastSeg = -1, lastKm = -1;
+  let railH = 0, stopTops = [], footerTop = Infinity, docMax = 1, heroEnd = 0, darkRanges = [], destRange = [0, 0], lastSeg = -1, lastKm = -1;
   const measure = () => {
     const docTop = el => el.getBoundingClientRect().top + scrollY;
     footerTop = docTop(footer);
     docMax = document.documentElement.scrollHeight - innerHeight;
     heroEnd = docTop($('.marquee'));
     darkRanges = $$('.exp, .arrival, .footer').map(el => [docTop(el), docTop(el) + el.offsetHeight]);
+    const dl = $('.dlist'); destRange = [docTop(dl), docTop(dl) + dl.offsetHeight];
     stopTops = stops.map(li => {
       const sec = document.getElementById(li.dataset.target);
       return sec ? sec.getBoundingClientRect().top + scrollY : 0;
@@ -488,7 +443,9 @@
     // hidden in the hero, over the activity panels (bottom-left) and in the footer
     const [expTop, expBottom] = darkRanges[0] || [0, 0];
     const overActs = scrollY + innerHeight > expTop + 200 && scrollY < expBottom - innerHeight * .4;
-    odoBox.classList.toggle('is-on', scrollY > innerHeight * .9 && scrollY + innerHeight < footerTop + 120 && !overActs);
+    // the destination photos alternate sides and reach the bottom-left corner: step aside there too
+    const overDests = scrollY + innerHeight > destRange[0] + 200 && scrollY + innerHeight < destRange[1];
+    odoBox.classList.toggle('is-on', scrollY > innerHeight * .9 && scrollY + innerHeight < footerTop + 120 && !overActs && !overDests);
     const km = Math.round(Math.min(1, scrollY / Math.max(1, docMax)) * 40075);
     if (km !== lastKm) { lastKm = km; odoText.data = String(km).padStart(5, '0').replace(/(\d{2})(\d{3})/, '$1 $2'); }
     // light text over dark sections, dark text over paper
@@ -558,28 +515,6 @@
     }), { rootMargin: '150% 0px' });
     warmSections.forEach(sec => ahead.observe(sec));
   }
-
-  /* =========================================================
-     ACTIVITIES ACCORDION
-     ========================================================= */
-  const acts = $$('.act'), actsWrap = $('#acts');
-  // --i / --o drive the phone layout (panels slide with transforms instead of resizing)
-  acts.forEach((a, i) => a.style.setProperty('--i', i));
-  const openAct = a => {
-    acts.forEach(x => x.classList.toggle('is-open', x === a));
-    actsWrap.style.setProperty('--o', acts.indexOf(a));
-  };
-  openAct(acts.find(a => a.classList.contains('is-open')) || acts[0]);
-  acts.forEach(a => {
-    a.addEventListener('click', () => openAct(a));
-    if (finePointer) {
-      // any movement over a closed panel opens it, not just entering it: a pointer that was already resting on a
-      // panel when the page stopped gliding (hover was off) responds to the very next nudge
-      const hoverOpen = () => { if (!a.classList.contains('is-open')) openAct(a); };
-      a.addEventListener('pointerenter', hoverOpen);
-      a.addEventListener('pointermove', hoverOpen);
-    }
-  });
 
   /* =========================================================
      POSTCARD DECK
