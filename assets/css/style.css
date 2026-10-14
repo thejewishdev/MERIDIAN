@@ -528,7 +528,6 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 .drow:nth-child(even) .drow__media { order: 2; }
 .drow__media { position: relative; aspect-ratio: 4 / 3; border-radius: 22px; overflow: hidden; background: #d9cfbf; }
 .drow__media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: var(--focus, 50% 50%); }
-.dboard__head, .drow__code { display: none; } /* phone-only parts of the departures board */
 .drow__meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; color: var(--ink-soft); }
 .drow__name { font-family: var(--serif); font-size: clamp(64px, 7.4vw, 128px); line-height: .84; letter-spacing: -.035em; margin: 16px 0 20px -4px; }
 .drow__text { color: var(--ink-soft); font-size: 17px; max-width: 42ch; margin: 0 0 28px; }
@@ -561,26 +560,27 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 .dests__outro .btn { grid-column: 2; grid-row: 1 / span 2; }
 
 @media (max-width: 900px) {
-  /* phones: a departures board. Same markup as the laptop list, restyled: small square photo, airport code,
-     city, live local time, then nights and price (the facts list is unwrapped into the row's grid) */
-  .dests__intro { margin-bottom: 30px; }
-  .dboard__head { display: flex; justify-content: space-between; margin: 0; padding-bottom: 10px; border-bottom: 1px solid var(--ink); color: var(--ink-soft); }
-  .dlist { gap: 0; }
-  .drow { grid-template-columns: 72px 1fr; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
-  .drow:nth-child(even) .drow__media { order: 0; }
-  .drow__media { aspect-ratio: 1; border-radius: 12px; }
+  /* phones: a minimal row you swipe. The browser scrolls and snaps it natively (no script). Each card is the
+     photo with just the number, the city and "nights · price" over it */
+  .dests__intro { margin-bottom: 28px; }
+  .dlist {
+    display: flex; gap: 12px;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+    margin: 0 calc(var(--gutter) * -1); padding: 0 var(--gutter); scroll-padding-inline: var(--gutter);
+  }
+  .dlist::-webkit-scrollbar { display: none; }
+  .drow { position: relative; display: block; flex: none; width: 78vw; max-width: 360px; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; scroll-snap-align: start; }
+  .drow__media { position: absolute; inset: 0; aspect-ratio: auto; border-radius: 0; }
   .drow__media .tag { display: none; }
-  .drow__body { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; column-gap: 10px; row-gap: 4px; }
-  .drow__meta, .drow__text { display: none; }
-  .drow__code { display: block; grid-column: 1; grid-row: 1; font-size: 12px; letter-spacing: .1em; color: var(--sun); }
-  .drow__name { grid-column: 2; grid-row: 1; font-size: 30px; line-height: 1; letter-spacing: -.02em; margin: 0; }
-  .dest__facts, .dest__facts li { display: contents; }
-  .dest__facts span, .dest__facts li:nth-child(2) { display: none; }
-  .dest__facts li:nth-child(1) b { grid-column: 3; grid-row: 1; font-size: 14px; }
-  .dest__facts li:nth-child(3) b, .dest__facts li:nth-child(4) b { grid-row: 2; font-size: 13px; font-weight: 500; color: var(--ink-soft); }
-  .dest__facts li:nth-child(3) b { grid-column: 2; }
-  .dest__facts li:nth-child(4) b { grid-column: 3; text-align: right; }
-  .dest__facts li:nth-child(4) b::before { content: "from "; font-weight: 400; }
+  .drow__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(12,9,6,.78) 0%, rgba(12,9,6,.12) 45%, transparent 60%); }
+  .drow__body { position: absolute; left: 18px; right: 18px; bottom: 16px; color: #fff; }
+  .drow__meta { color: rgba(255,255,255,.8); }
+  .drow__meta span + span, .drow__text { display: none; }
+  .drow__name { font-size: clamp(44px, 13vw, 56px); margin: 6px 0 10px; }
+  .dest__facts { display: flex; gap: 14px; padding-top: 10px; border-top-color: rgba(255,255,255,.3); }
+  .dest__facts span, .dest__facts li:nth-child(-n+2) { display: none; }
+  .dest__facts b { font-size: 14px; font-weight: 500; }
+  .dest__facts li:nth-child(4) b::before { content: "·\00a0\00a0"; opacity: .6; }
   .dests__outro { grid-template-columns: 1fr; row-gap: 24px; }
   .dests__outro .btn { grid-column: 1; grid-row: auto; justify-self: start; }
 }
