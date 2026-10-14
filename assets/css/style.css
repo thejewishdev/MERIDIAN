@@ -528,6 +528,7 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 .drow:nth-child(even) .drow__media { order: 2; }
 .drow__media { position: relative; aspect-ratio: 4 / 3; border-radius: 22px; overflow: hidden; background: #d9cfbf; }
 .drow__media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: var(--focus, 50% 50%); }
+.dboard__head, .drow__code { display: none; } /* phone-only parts of the departures board */
 .drow__meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; color: var(--ink-soft); }
 .drow__name { font-family: var(--serif); font-size: clamp(64px, 7.4vw, 128px); line-height: .84; letter-spacing: -.035em; margin: 16px 0 20px -4px; }
 .drow__text { color: var(--ink-soft); font-size: 17px; max-width: 42ch; margin: 0 0 28px; }
@@ -560,21 +561,26 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 .dests__outro .btn { grid-column: 2; grid-row: 1 / span 2; }
 
 @media (max-width: 900px) {
-  /* phones: the list becomes a row you swipe; the browser scrolls and snaps it natively (no script) */
-  .dests__intro { margin-bottom: 18px; }
-  .dlist {
-    display: flex; gap: 16px; align-items: flex-start;
-    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
-    margin: 0 calc(var(--gutter) * -1); padding: 6px var(--gutter) 8px; scroll-padding-inline: var(--gutter);
-  }
-  .dlist::-webkit-scrollbar { display: none; }
-  .drow { display: block; flex: none; width: 82vw; max-width: 420px; scroll-snap-align: start; }
-  .drow__media { margin-bottom: 18px; border-radius: 18px; }
-  .drow__name { font-size: clamp(48px, 13vw, 64px); margin: 10px 0 12px; }
-  .drow__text { font-size: 15px; margin-bottom: 22px; }
-  .dest__facts { grid-template-columns: 1fr 1fr; gap: 12px 16px; }
-  .dest__facts b { font-size: 15px; }
-  .tag { right: 16px; width: 74px; padding: 30px 8px 10px; } .tag .flag { width: 40px; height: 27px; } .tag b { font-size: 16px; }
+  /* phones: a departures board. Same markup as the laptop list, restyled: small square photo, airport code,
+     city, live local time, then nights and price (the facts list is unwrapped into the row's grid) */
+  .dests__intro { margin-bottom: 30px; }
+  .dboard__head { display: flex; justify-content: space-between; margin: 0; padding-bottom: 10px; border-bottom: 1px solid var(--ink); color: var(--ink-soft); }
+  .dlist { gap: 0; }
+  .drow { grid-template-columns: 72px 1fr; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .drow:nth-child(even) .drow__media { order: 0; }
+  .drow__media { aspect-ratio: 1; border-radius: 12px; }
+  .drow__media .tag { display: none; }
+  .drow__body { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; column-gap: 10px; row-gap: 4px; }
+  .drow__meta, .drow__text { display: none; }
+  .drow__code { display: block; grid-column: 1; grid-row: 1; font-size: 12px; letter-spacing: .1em; color: var(--sun); }
+  .drow__name { grid-column: 2; grid-row: 1; font-size: 30px; line-height: 1; letter-spacing: -.02em; margin: 0; }
+  .dest__facts, .dest__facts li { display: contents; }
+  .dest__facts span, .dest__facts li:nth-child(2) { display: none; }
+  .dest__facts li:nth-child(1) b { grid-column: 3; grid-row: 1; font-size: 14px; }
+  .dest__facts li:nth-child(3) b, .dest__facts li:nth-child(4) b { grid-row: 2; font-size: 13px; font-weight: 500; color: var(--ink-soft); }
+  .dest__facts li:nth-child(3) b { grid-column: 2; }
+  .dest__facts li:nth-child(4) b { grid-column: 3; text-align: right; }
+  .dest__facts li:nth-child(4) b::before { content: "from "; font-weight: 400; }
   .dests__outro { grid-template-columns: 1fr; row-gap: 24px; }
   .dests__outro .btn { grid-column: 1; grid-row: auto; justify-self: start; }
 }
@@ -609,17 +615,15 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
   .xcard:nth-child(even) { top: 50px; }
 }
 @media (max-width: 900px) {
-  /* phones: a row of large posters you swipe; native scroll + snap, no script */
-  .xcards {
-    display: flex; gap: 12px;
-    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
-    margin: 0 calc(var(--gutter) * -1); padding: 0 var(--gutter) 6px; scroll-padding-inline: var(--gutter);
-  }
-  .xcards::-webkit-scrollbar { display: none; }
-  .xcard { flex: none; width: 74vw; max-width: 340px; scroll-snap-align: start; border-radius: 16px; }
+  /* phones: four wide photo strips stacked; the name on the left, place and season on the right */
+  .xcards { grid-template-columns: 1fr; gap: 12px; padding-bottom: 0; }
+  .xcard { aspect-ratio: 16 / 10; border-radius: 16px; }
   .xcard:nth-child(even) { top: 0; }
-  .xcard__cap { inset: 16px; }
-  .xcard__name { font-size: clamp(38px, 11vw, 48px); }
+  .xcard::after { background: linear-gradient(0deg, rgba(5,20,28,.85) 0%, rgba(5,20,28,.25) 50%, transparent 75%); }
+  .xcard__cap { inset: auto 16px 14px; display: grid; grid-template-columns: 1fr auto; align-items: end; column-gap: 12px; row-gap: 5px; }
+  .xcard__name { grid-column: 1; grid-row: 1 / span 2; margin: 0; font-size: clamp(34px, 10vw, 44px); }
+  .xcard__place { grid-column: 2; grid-row: 1; justify-content: flex-end; text-align: right; font-size: 8.5px; }
+  .xcard__season { grid-column: 2; grid-row: 2; margin: 0; padding: 0; border: 0; text-align: right; font-size: 8.5px; }
 }
 
 /* =========================================================
@@ -894,9 +898,3 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .manifesto .w { opacity: 1; }
 }
-
-/* "Swipe →" under a heading, only where a row scrolls sideways (phones) */
-.swipe-hint { display: none; margin: 0 0 14px; color: var(--ink-soft); }
-.swipe-hint i { font-style: normal; }
-.exp .swipe-hint { color: rgba(243,237,226,.55); }
-@media (max-width: 900px) { .swipe-hint { display: block; } }
