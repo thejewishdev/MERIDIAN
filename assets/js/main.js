@@ -186,8 +186,6 @@
   function introHero(delay) {
     const tl = gsap.timeline({ delay });
     tl.from('.reel', { scale: 1.25, duration: 2.2, ease: 'expo.out' }, 0)
-      .from('.hero__title .line-mask > span', { yPercent: 110, duration: 1.3, stagger: .12, ease: 'expo.out' }, .55)
-      .from('.hero__kicker .line-mask > span', { yPercent: 110, duration: 1, ease: 'expo.out' }, .5)
       .from('.hud, .nav, .scroll-cue, .rail', { opacity: 0, duration: 1 }, 1);
   }
 
@@ -607,13 +605,6 @@
       btn.addEventListener('pointerleave', () => { mx(0); my(0); });
     });
 
-    // hero headline drifts with the mouse
-    const hx = gsap.quickTo('.hero__title', 'x', { duration: 1.2, ease: 'power3' });
-    const hy = gsap.quickTo('.hero__title', 'y', { duration: 1.2, ease: 'power3' });
-    $('#heroStage').addEventListener('pointermove', e => {
-      const nx = e.clientX / innerWidth - .5, ny = e.clientY / innerHeight - .5;
-      hx(nx * -18); hy(ny * -10);
-    });
   }
 
 })();
