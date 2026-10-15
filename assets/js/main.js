@@ -367,11 +367,6 @@
         gsap.set(inks(ppHolder), { clearProps: 'all' });
       };
     });
-    // --- Postcard deck tilts in
-    gsap.from('.deck', { rotate: 8, y: 120, opacity: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.deck', start: 'top 85%' } });
-    // animate the plain wrapper, never the pass itself: moving the element that owns the blur filter and masks
-    // makes browsers redo them every frame; this way they're drawn once and the finished pass just slides in
-    gsap.from('.pass-wrap', { y: 120, rotate: -3, opacity: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.pass-wrap', start: 'top 90%' } });
   }
 
   /* =========================================================
