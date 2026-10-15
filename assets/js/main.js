@@ -254,36 +254,6 @@
       });
     });
 
-    // --- Manifesto words light up as you read
-    const mani = $('#manifesto');
-    const wrapWords = node => {
-      [...node.childNodes].forEach(n => {
-        if (n.nodeType === 3) {
-          const frag = document.createDocumentFragment();
-          n.textContent.split(/(\s+)/).forEach(part => {
-            if (!part.trim()) { frag.appendChild(document.createTextNode(part)); return; }
-            const s = document.createElement('span'); s.className = 'w'; s.textContent = part; frag.appendChild(s);
-          });
-          n.replaceWith(frag);
-        } else if (n.nodeType === 1) wrapWords(n);
-      });
-    };
-    wrapWords(mani);
-    gsap.to($$('.w', mani), { opacity: 1, stagger: .1, ease: 'none', scrollTrigger: { trigger: mani, start: 'top 80%', end: 'bottom 45%', scrub: true } });
-
-    // --- Counters
-    $$('[data-count]').forEach(el => {
-      const end = parseFloat(el.dataset.count), dec = +el.dataset.decimals || 0, k = el.dataset.format === 'k';
-      const obj = { v: 0 };
-      ScrollTrigger.create({
-        trigger: el, start: 'top 85%', once: true,
-        onEnter: () => gsap.to(obj, {
-          v: end, duration: 2.2, ease: 'expo.out',
-          onUpdate: () => { el.textContent = k ? (obj.v / 1000).toFixed(1) + 'k' : obj.v.toFixed(dec); }
-        })
-      });
-    });
-
     // --- Why us: a passport you open and leaf through (swipe it, or use the arrows); scrolling never turns the pages
     const ppHolder = $('#ppFaces');
     const ppFaces = $$('.pp-face', ppHolder);
@@ -397,20 +367,11 @@
         gsap.set(inks(ppHolder), { clearProps: 'all' });
       };
     });
-    // --- Section headings reveal
-    $$('.chapter').forEach(ch => gsap.from(ch.children, { y: 20, opacity: 0, stagger: .1, duration: .9, ease: 'expo.out', scrollTrigger: { trigger: ch, start: 'top 88%' } }));
-    $$('.exp__title, .postcards__intro h2, .arrival__title').forEach(h =>
-      gsap.from(h, { y: 60, opacity: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: h, start: 'top 85%' } }));
-
-    // --- Destinations: each row fades up once as it comes into view (time-based, not tied to the scroll)
-    $$('.drow').forEach(row => gsap.from(row, { y: 60, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: row, start: 'top 85%' } }));
-
     // --- Postcard deck tilts in
     gsap.from('.deck', { rotate: 8, y: 120, opacity: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.deck', start: 'top 85%' } });
     // animate the plain wrapper, never the pass itself: moving the element that owns the blur filter and masks
     // makes browsers redo them every frame; this way they're drawn once and the finished pass just slides in
     gsap.from('.pass-wrap', { y: 120, rotate: -3, opacity: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.pass-wrap', start: 'top 90%' } });
-    gsap.from('.footer__word', { yPercent: 40, opacity: 0, duration: 1.6, ease: 'expo.out', scrollTrigger: { trigger: '.footer', start: 'top 85%' } });
   }
 
   /* =========================================================

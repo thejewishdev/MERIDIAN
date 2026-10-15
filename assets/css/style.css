@@ -316,7 +316,6 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 .crew { position: relative; padding: clamp(80px, 12vw, 160px) var(--gutter) clamp(80px, 10vw, 140px) calc(var(--gutter) + 40px); }
 @media (max-width: 900px) { .crew { padding-left: var(--gutter); } }
 .manifesto { font-family: var(--serif); font-size: clamp(32px, 4.6vw, 76px); line-height: 1.06; letter-spacing: -.015em; margin: 0 0 clamp(60px, 9vw, 120px); max-width: 1200px; }
-.manifesto .w { opacity: .14; transition: none; }
 .manifesto em { color: var(--sun); }
 
 .crew__grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(30px, 6vw, 90px); align-items: center; }
@@ -517,7 +516,7 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 
 /* =========================================================
    02 · DESTINATIONS — an editorial list: one row per place, the photo alternating left / right.
-   Photos sit still in the page and scroll natively; each row fades in once (main.js)
+   Photos sit still in the page and scroll natively
    ========================================================= */
 .dests { position: relative; background: var(--paper-2); padding: clamp(90px, 12vw, 160px) var(--gutter) clamp(90px, 10vw, 140px) calc(var(--gutter) + 40px); }
 @media (max-width: 900px) { .dests { padding-left: var(--gutter); } }
@@ -591,7 +590,7 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 
 /* =========================================================
    03 · EXPERIENCES — four portrait cards side by side. Static: photos sit still and scroll natively,
-   nothing reacts to hover or scrolling (the row fades in once, from main.js)
+   nothing reacts to hover or scrolling
    ========================================================= */
 .exp { background: var(--sea); color: #f3ede2; padding: clamp(90px, 12vw, 160px) var(--gutter) clamp(90px, 10vw, 140px) calc(var(--gutter) + 40px); position: relative; overflow: hidden; }
 @media (max-width: 900px) { .exp { padding-left: var(--gutter); } }
@@ -900,7 +899,6 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  .manifesto .w { opacity: 1; }
 }
 
 /* "Swipe →" above the destination row, phones only */
