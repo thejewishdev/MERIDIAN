@@ -55,15 +55,18 @@
   const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   $('#loaderClock').textContent = clock();
 
-  // real preload: the board stays up only until the hero photo is downloaded and decoded, no longer
+  // real preload: the board stays up until the hero photo is decoded and the globe has drawn its first frame.
+  // The globe sits right below the hero, so loading it after the curtain lifted always landed on the first
+  // scroll: three.js parsing, WebGL setup and the texture upload stalled the page right there (worst in Safari)
   const heroImg = $('#heroImg');
-  let loaded = false, shownPct = 0;
+  let loaded = false, globeReady = false, shownPct = 0;
+  document.addEventListener('globe:ready', () => { globeReady = true; }, { once: true });
   const t0 = performance.now();
   // decode() resolves once the photo is ready to paint, so the curtain never lifts on a half-drawn sky
   const whenLoaded = heroImg.complete ? Promise.resolve() : new Promise(ok => { heroImg.addEventListener('load', ok, { once: true }); heroImg.addEventListener('error', ok, { once: true }); });
   whenLoaded.then(() => heroImg.decode ? heroImg.decode() : 0).catch(() => {}).then(() => { loaded = true; });
   (function tick() {
-    if (loaded || performance.now() - t0 > 7000) { finishLoading(); return; } // never block forever
+    if ((loaded && globeReady) || performance.now() - t0 > 7000) { finishLoading(); return; } // never block forever
     // creep towards 90% while waiting; finishLoading jumps to 100
     shownPct += (90 - shownPct) * .04;
     $('#loaderPct').textContent = Math.round(shownPct);
@@ -91,21 +94,20 @@
       if (hasGSAP) ScrollTrigger.refresh();
       const target = startHash && document.querySelector(startHash);
       if (target) setTimeout(() => goTo(target), 1200);
-      queueGlobe();
+      // then the section photos, decoded one by one long before anyone reaches them
+      setTimeout(startWarmUp, 2500);
     });
   }
 
   /* =========================================================
      GLOBE — three.js + textures + globe.js, loaded on demand
      ========================================================= */
-  let globeQueued = false;
   const loadScript = src => new Promise((ok, fail) => {
     const s = document.createElement('script');
     s.src = src; s.async = false; s.onload = ok; s.onerror = fail;
     document.body.appendChild(s);
   });
-  function loadGlobe() {
-    if (globeQueued) return; globeQueued = true;
+  (function loadGlobe() {
     // phones get half-size textures: their globe is ~350px wide, so 2048px maps were never visible there
     const small = matchMedia('(max-width: 900px)').matches;
     // over http the textures are plain WebP files (smaller, cached, decoded off the main thread);
@@ -119,18 +121,9 @@
     Promise.all([
       loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'),
       local && loadScript(small ? 'assets/js/earth-textures-sm.js' : 'assets/js/earth-textures.js'),
-      loadScript('assets/js/globe.js')
-    ]).catch(() => {});
-  }
-  function queueGlobe() {
-    // streams in during idle time once the hero is up; anyone who scrolls straight down gets it sooner
-    'requestIdleCallback' in window ? requestIdleCallback(loadGlobe, { timeout: 2500 }) : setTimeout(loadGlobe, 1200);
-    // then the section photos, decoded one by one long before anyone reaches them
-    setTimeout(startWarmUp, 2500);
-    if (!('IntersectionObserver' in window)) return;
-    const gio = new IntersectionObserver(([e]) => { if (e.isIntersecting) { gio.disconnect(); loadGlobe(); } }, { rootMargin: '100% 0px' });
-    gio.observe($('#globe'));
-  }
+      loadScript('assets/js/globe.js?v=4')
+    ]).catch(() => { globeReady = true; }); // no globe (offline CDN): don't hold the loader for it
+  })();
 
   /* =========================================================
      SCROLLING — native. The page used to scroll through Lenis (JS smooth scroll): every frame of scrolling then
@@ -173,7 +166,7 @@
   }));
 
   /* =========================================================
-     HERO — pause its loops (photo drift, film grain, blinking dot) while it's off screen
+     HERO — pause the scroll cue's loop while it's off screen
      ========================================================= */
   new IntersectionObserver(([e]) => {
     $('#heroStage').classList.toggle('is-offscreen', !e.isIntersecting);
@@ -181,12 +174,19 @@
   // endless CSS loops (swinging luggage tags, live-time dots, hint arrows) still cost a style pass every
   // frame while the page scrolls, even off screen; pause each section's loops while it's out of view
   const loops = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('is-offscreen', !e.isIntersecting)));
-  $$('#destinations, #why').forEach(s => loops.observe(s));
+  $$('#destinations, #why, .marquee').forEach(s => loops.observe(s));
+  // marquee: a CSS animation on the compositor (it used to be moved from JS every frame, so any busy moment on the
+  // main thread made it stutter); a second copy of the track makes the loop seamless, at a steady 45px/s
+  $$('.marquee__row').forEach(row => {
+    const track = $('.marquee__track', row);
+    const copy = track.cloneNode(true); copy.setAttribute('aria-hidden', 'true');
+    row.appendChild(copy);
+    row.style.setProperty('--dur', (track.offsetWidth / 45).toFixed(1) + 's');
+  });
 
   function introHero(delay) {
     const tl = gsap.timeline({ delay });
-    tl.from('.reel', { scale: 1.25, duration: 2.2, ease: 'expo.out' }, 0)
-      .from('.hud, .nav, .scroll-cue, .rail', { opacity: 0, duration: 1 }, 1);
+    tl.from('.nav, .scroll-cue, .rail', { opacity: 0, duration: 1 }, .5);
   }
 
   /* =========================================================
@@ -197,60 +197,7 @@
 
   function initScenes() {
     if (!hasGSAP) return;
-    // anticipatePin pins a little early to hide the lag between native (threaded) scrolling and the pin
-    const pinAhead = 1;
     const mm = gsap.matchMedia();
-
-    // --- Hero → airplane window
-    mm.add({ desktop: '(min-width: 901px)', mobile: '(max-width: 900px)' }, ctx => {
-      const { desktop } = ctx.conditions;
-      // the window's final opening (top/right/bottom/left in %, corner radius in px)
-      const [t, r, b, l, rad] = desktop ? [15, 34, 15, 34, 180] : [20, 14, 30, 14, 120];
-      // one progress value drives both the video's clip and the window frame, so the frame always hugs the picture
-      const win = { p: 0 };
-      const frame = $('.window-frame'), reelFrame = $('#reelFrame');
-      const drawWindow = () => {
-        const p = win.p, k = n => (n * p).toFixed(3);
-        reelFrame.style.clipPath = `inset(${k(t)}% ${k(r)}% ${k(b)}% ${k(l)}% round ${k(rad)}px)`;
-        frame.style.inset = `${k(t)}% ${k(r)}% ${k(b)}% ${k(l)}%`;
-        frame.style.borderRadius = `${k(rad)}px`;
-      };
-      drawWindow();
-      const tl = gsap.timeline({
-        scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=130%', scrub: true, pin: true, anticipatePin: pinAhead } // native scrolling is already smooth: follow it directly
-      });
-      tl.to('#heroContent', { y: -80, opacity: 0, duration: .3, ease: 'power1.in' }, 0)
-        .to('.hud, #scrollCue', { opacity: 0, duration: .2, ease: 'none' }, 0)
-        .to('.reel__shade', { opacity: .35, duration: .6, ease: 'none' }, 0)
-        .to(win, { p: 1, duration: 1, ease: 'power1.inOut', onUpdate: drawWindow }, 0)
-        .fromTo('.window-frame', { opacity: 0 }, { opacity: 1, duration: .45, ease: 'power1.out' }, .2)
-        .fromTo('#windowCopy', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .35, ease: 'power2.out' }, .7)
-        .fromTo('.window-glow', { opacity: 0 }, { opacity: 1, duration: .25, ease: 'none' }, .85)
-        .fromTo('.window-frame__shade', { scaleY: 0 }, { scaleY: 1, duration: .3, ease: 'power2.out' }, .9)
-        .to({}, { duration: .2 }); // rest on the finished window before the page moves on
-      return () => { reelFrame.style.clipPath = ''; frame.style.inset = ''; frame.style.borderRadius = ''; };
-    });
-
-    // --- Marquee driven by scroll velocity
-    $$('.marquee__row').forEach(row => {
-      const track = $('.marquee__track', row);
-      row.appendChild(track.cloneNode(true));
-      const dir = +row.dataset.dir;
-      let x = 0, speed = 1, w = track.offsetWidth, on = false;
-      const setX = gsap.quickSetter(row.children, 'x', 'px');
-      const tick = () => {
-        x -= (0.6 + speed) * dir;
-        if (x <= -w) x += w; if (x > 0) x -= w;
-        setX(x);
-        speed += (0 - speed) * .06;
-      };
-      ScrollTrigger.create({
-        trigger: row, start: 'top bottom', end: 'bottom top',
-        onToggle: s => { if (s.isActive && !on) { gsap.ticker.add(tick); on = true; } else if (!s.isActive && on) { gsap.ticker.remove(tick); on = false; } },
-        onUpdate: s => { speed = Math.min(14, Math.abs(s.getVelocity()) / 220); },
-        onRefresh: () => { w = track.offsetWidth; }
-      });
-    });
 
     // --- Why us: a passport you open and leaf through (swipe it, or use the arrows); scrolling never turns the pages
     const ppHolder = $('#ppFaces');
@@ -444,15 +391,14 @@
     const km = Math.round(Math.min(1, scrollY / Math.max(1, docMax)) * 40075);
     if (km !== lastKm) { lastKm = km; odoText.data = String(km).padStart(5, '0').replace(/(\d{2})(\d{3})/, '$1 $2'); }
     // light text over dark sections, dark text over paper
-    const darkAt = (screenY, heroLimit) => {
-      if (scrollY < heroEnd - screenY) return scrollY < heroLimit;
+    const darkAt = screenY => {
       const d = scrollY + screenY;
       return darkRanges.some(([a, b]) => d >= a && d < b);
     };
-    nav.classList.toggle('on-dark', darkAt(40, innerHeight * .55));
+    nav.classList.toggle('on-dark', darkAt(40));
     nav.classList.toggle('is-scrolled', scrollY > heroEnd - 80);
-    rail.classList.toggle('on-dark', darkAt(innerHeight / 2, innerHeight * .12));
-    odoBox.classList.toggle('on-dark', darkAt(innerHeight - 40, innerHeight * .1));
+    rail.classList.toggle('on-dark', darkAt(innerHeight / 2));
+    odoBox.classList.toggle('on-dark', darkAt(innerHeight - 40));
   };
   stops.forEach(li => li.addEventListener('click', () => {
     const t = document.getElementById(li.dataset.target);
@@ -488,14 +434,19 @@
     const url = (el.style.backgroundImage.match(/url\(["']?([^"')]+)/) || [])[1];
     if (url) { const img = new Image(); img.src = url; warmQueue.push(img); }
   });
-  let warming = false;
+  // decoding big photos and uploading them to the GPU competes with scrolling (Safari has no
+  // requestIdleCallback, so "idle" used to mean "now"): each photo waits until the page has been still for a moment,
+  // unless its section is about to arrive (rush)
+  let warming = false, lastScroll = 0, rush = 0;
+  addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true });
   const warmNext = () => {
-    const img = warmQueue.shift();
-    if (!img) { warming = false; return; }
+    if (!warmQueue.length) { warming = false; return; }
     warming = true;
+    if (!rush && performance.now() - lastScroll < 300) { setTimeout(warmNext, 150); return; }
+    if (rush) rush--;
+    const img = warmQueue.shift();
     img.loading = 'eager';
-    (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() =>
-      'requestIdleCallback' in window ? requestIdleCallback(warmNext, { timeout: 400 }) : setTimeout(warmNext, 30));
+    (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => setTimeout(warmNext, 30));
   };
   function startWarmUp() { if (!warming) warmNext(); }
   if ('IntersectionObserver' in window) {
@@ -506,6 +457,7 @@
       const mine = warmQueue.filter(img => e.target.contains(img));
       if (!mine.length) return;
       warmQueue.splice(0, warmQueue.length, ...mine, ...warmQueue.filter(img => !mine.includes(img)));
+      rush = mine.length;
       startWarmUp();
     }), { rootMargin: '150% 0px' });
     warmSections.forEach(sec => ahead.observe(sec));

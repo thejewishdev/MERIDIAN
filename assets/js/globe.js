@@ -45,6 +45,7 @@
     f.className = 'globe__fallback';
     if (window.EARTH_TEX) f.style.setProperty('--tex', `url(${EARTH_TEX.day})`);
     wrap.prepend(f);
+    document.dispatchEvent(new Event('globe:ready'));
     return;
   }
 
@@ -58,12 +59,12 @@
 
   const sunDir = new THREE.Vector3(-.65, .35, .7).normalize();   // fixed in view space: sunlit from upper-left
   const loader = new THREE.TextureLoader();
-  // once every texture is in, draw one frame off-screen during idle time: the GPU upload and shader
-  // compile then happen long before the globe scrolls into view (otherwise they cause a visible hitch)
+  // once every texture is in, draw one frame straight away (still behind the loader): the GPU upload and shader
+  // compile then happen before anyone scrolls (otherwise they cause a visible hitch); main.js lifts the loader after
   let texPending = 0;
   const warmUp = () => {
-    const go = () => { if (!visible) renderer.render(scene, camera); };
-    'requestIdleCallback' in window ? requestIdleCallback(go, { timeout: 2000 }) : setTimeout(go, 200);
+    renderer.render(scene, camera);
+    document.dispatchEvent(new Event('globe:ready'));
   };
   const tex = k => {
     texPending++;

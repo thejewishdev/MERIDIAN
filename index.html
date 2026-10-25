@@ -13,7 +13,7 @@
   <link rel="preload" href="assets/fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/style.css?v=3">
+  <link rel="stylesheet" href="assets/css/style.css?v=4">
   <!-- without JavaScript the loader would never lift -->
   <noscript><style>.loader { display: none; } body.is-loading { overflow: visible; }</style></noscript>
 </head>
@@ -84,43 +84,23 @@
 
   <main id="main">
 
-    <!-- ============ 00 · HERO: the reel ============ -->
+    <!-- ============ 00 · HERO: the window seat ============ -->
     <section class="hero" id="departure">
       <div class="hero__stage" id="heroStage">
-        <div class="reel-frame" id="reelFrame">
-          <div class="reel" id="reel">
-            <!-- Photo: Nicolas J Leclercq on Unsplash (unsplash.com/photos/84qOq203MS0).
-                 Fills the screen: as wide as the viewport, or 1.5x its height on portrait screens -->
-            <img class="reel__img" id="heroImg" src="assets/img/w/hero-1920.webp"
-                 srcset="assets/img/w/hero-1280.webp 1280w, assets/img/w/hero-1920.webp 1920w, assets/img/w/hero-2560.webp 2560w"
-                 sizes="(max-aspect-ratio: 3/2) 150vh, 100vw" width="2560" height="1706"
-                 alt="" fetchpriority="high" decoding="async">
-          </div>
-          <div class="reel__shade"></div>
-          <div class="reel__grain"></div>
+        <div class="window-copy">
+          <p class="mono">Seat 1A</p>
+          <h1>Always the <em>window</em> seat.</h1>
+          <p class="window-copy__sub">Fasten your seatbelt — your journey starts below.</p>
         </div>
 
         <div class="window-glow" aria-hidden="true"></div>
-        <div class="window-frame" aria-hidden="true"><span class="window-frame__shade"></span></div>
-
-        <div class="hud mono" aria-hidden="true">
-          <div class="hud__rec"><i></i> ALT 38 000 FT</div>
-          <div class="hud__cut">LIS → ANYWHERE</div>
-        </div>
-
-        <div class="hero__content" id="heroContent">
-          <p class="hero__kicker mono"><span class="line-mask"><span>Est. 2014 — Handcrafted journeys to 62 countries</span></span></p>
-          <h1 class="hero__title">
-            <span class="line-mask"><span>Don’t just</span></span>
-            <span class="line-mask"><span>see the world.</span></span>
-            <span class="line-mask"><span><em>Feel</em> it.</span></span>
-          </h1>
-        </div>
-
-        <div class="window-copy" id="windowCopy">
-          <p class="mono">Seat 1A</p>
-          <h2>Always the <em>window</em> seat.</h2>
-          <p class="window-copy__sub">Fasten your seatbelt — your journey starts below.</p>
+        <div class="window-frame" aria-hidden="true">
+          <!-- Photo: unsplash.com/photos/airplane-wing-over-coastal-landscape-HcT_6QNLcDQ -->
+          <img class="window-frame__img" id="heroImg" src="assets/img/w/window-960.webp"
+               srcset="assets/img/w/window-640.webp 640w, assets/img/w/window-960.webp 960w, assets/img/w/window-1280.webp 1280w"
+               sizes="(max-width: 900px) 72vw, 32vw" width="1280" height="1706"
+               alt="" fetchpriority="high" decoding="async">
+          <span class="window-frame__shade"></span>
         </div>
 
         <a href="#crew" class="scroll-cue mono" id="scrollCue" data-scroll aria-label="Scroll down"><span>Scroll down</span><i></i></a>
@@ -683,6 +663,6 @@
        in the background once the page is up (they're ~1.8MB and only needed further down) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-  <script src="assets/js/main.js?v=3" defer></script>
+  <script src="assets/js/main.js?v=4" defer></script>
 </body>
 </html>

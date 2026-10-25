@@ -219,81 +219,48 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 @media (max-width: 900px) { .rail, .odometer { display: none; } }
 
 /* =========================================================
-   HERO — the reel
+   HERO — the window seat (static: no pin, no scrubbed clip-path)
    ========================================================= */
 .hero { position: relative; height: 100vh; height: 100svh; }
 .hero__stage { position: relative; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
-.reel-frame {
-  position: absolute; inset: 0;
-  clip-path: inset(0% 0% 0% 0% round 0px);
-  background: #000;
-  will-change: clip-path;
-}
-.reel { position: absolute; inset: 0; overflow: hidden; }
-.reel__img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 62% 50%; display: block; background: #c9a9a6;
-  /* a slow drift keeps the still photo alive; transform-only, so it runs on the compositor (paused off-screen) */
-  animation: drift 24s ease-in-out infinite alternate; }
-@keyframes drift { from { transform: scale(1.02) translate3d(0, 0, 0); } to { transform: scale(1.08) translate3d(-1.5%, -1%, 0); } }
-/* pause everything in the hero while it is scrolled away */
+/* pause the scroll cue while the hero is scrolled away */
 .is-offscreen *, .is-offscreen *::before, .is-offscreen *::after { animation-play-state: paused !important; }
 
-/* readability: deep scrim behind the headline (bottom-left), light touch elsewhere so the footage stays bright */
-/* own layer: its opacity is scrubbed while the hero turns into the window; without one, its three full-screen
-   gradients were repainted every frame (~87% of that scroll's rendering cost) */
-.reel__shade { position: absolute; inset: 0; pointer-events: none; will-change: opacity; background:
-  linear-gradient(180deg, rgba(0,0,0,.32) 0%, transparent 20%, transparent 40%, rgba(20,8,12,.36) 62%, rgba(20,8,12,.72) 100%),
-  linear-gradient(90deg, rgba(20,8,12,.34) 0%, rgba(20,8,12,.1) 50%, transparent 75%),
-  radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.25) 100%); }
-.reel__grain { position: absolute; inset: -8%; will-change: transform; pointer-events: none; opacity: .13; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: grain .6s steps(4) infinite; }
-@keyframes grain { 0% { transform: translate(0,0); } 25% { transform: translate(-3%,2%); } 50% { transform: translate(2%,-3%); } 75% { transform: translate(-2%,-2%); } 100% { transform: translate(3%,2%); } }
-
-.hud { position: absolute; top: 92px; left: 0; right: 0; padding: 0 var(--gutter); display: flex; justify-content: space-between; color: rgba(255,255,255,.85); z-index: 4; pointer-events: none; }
-.hud__rec { display: flex; align-items: center; gap: 8px; padding-left: 34px; }
-.hud__rec i { width: 8px; height: 8px; border-radius: 50%; background: #ff2f2f; animation: blink 1s steps(1) infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-@media (max-width: 900px) { .hud { top: 74px; } .hud__rec { padding-left: 0; } }
-
-.hero__content { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 var(--gutter) clamp(28px, 5vh, 56px) calc(var(--gutter) + 34px); color: #fff; z-index: 4; }
-@media (max-width: 900px) { .hero__content { padding-left: var(--gutter); } }
-.line-mask { display: block; overflow: hidden; padding-bottom: .04em; }
-.line-mask > span { display: inline-block; will-change: transform; }
-.hero__kicker { margin: 0 0 18px; color: rgba(255,255,255,.92); text-shadow: 0 1px 2px rgba(0,0,0,.4); }
-.hero__title { font-family: var(--serif); font-size: clamp(54px, 9.5vw, 168px); line-height: .9; letter-spacing: -.025em; text-shadow: 0 1px 2px rgba(0,0,0,.3); }
-.hero__title em { color: #ffbe9f; }
-
-/* airplane window (end state of hero scroll) */
 .window-frame {
   position: absolute; inset: 15% 34%;
-  border-radius: 180px; pointer-events: none; opacity: 0; z-index: 2; overflow: hidden;
-  box-shadow: 0 0 0 18px #fbf7ef, 0 0 0 19px #d9cfbf, 0 0 0 46px #f0e9dc, inset 0 0 0 10px rgba(255,255,255,.35);
+  border-radius: 180px; pointer-events: none; z-index: 2; overflow: hidden; background: #9fc3dd;
+  box-shadow: 0 0 0 18px #fbf7ef, 0 0 0 19px #d9cfbf, 0 0 0 46px #f0e9dc;
 }
-/* the window's soft shadows: blurred, so they sit on a static layer that only fades in (never repainted while the window shrinks) */
-.window-glow {
-  position: absolute; inset: 15% 34%; border-radius: 180px; pointer-events: none; opacity: 0; z-index: 2; will-change: opacity;
-  box-shadow: 0 30px 80px 46px rgba(80,60,30,.18), inset 0 0 60px rgba(0,0,0,.4);
-}
-.window-frame__shade { position: absolute; left: 0; right: 0; top: 0; height: 12%; transform: scaleY(0); transform-origin: top; border-radius: 180px 180px 0 0; background: linear-gradient(#ebe3d4, #d9cfbf); box-shadow: 0 4px 10px rgba(0,0,0,.15); }
-.window-copy { position: absolute; top: 0; bottom: 0; left: var(--gutter); width: 28%; display: flex; flex-direction: column; justify-content: center; opacity: 0; z-index: 3; padding-left: 34px; pointer-events: none; }
+.window-frame__img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 50% 60%; display: block; }
+/* the pane's inner rim and depth sit above the photo */
+.window-frame::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 10px rgba(255,255,255,.35), inset 0 0 60px rgba(0,0,0,.4); }
+.window-glow { position: absolute; inset: 15% 34%; border-radius: 180px; pointer-events: none; z-index: 1; box-shadow: 0 30px 80px 46px rgba(80,60,30,.18); }
+.window-frame__shade { position: absolute; left: 0; right: 0; top: 0; height: 12%; z-index: 1; border-radius: 180px 180px 0 0; background: linear-gradient(#ebe3d4, #d9cfbf); box-shadow: 0 4px 10px rgba(0,0,0,.15); }
+.window-copy { position: absolute; top: 0; bottom: 0; left: var(--gutter); width: 28%; display: flex; flex-direction: column; justify-content: center; z-index: 3; padding-left: 34px; }
 .window-copy p { margin: 0; }
-.window-copy h2 { font-family: var(--serif); font-size: clamp(34px, 4vw, 64px); line-height: .95; margin: 10px 0 14px; }
-.window-copy h2 em { color: var(--sun); }
+.window-copy h1 { font-family: var(--serif); font-size: clamp(34px, 4vw, 64px); line-height: .95; margin: 10px 0 14px; }
+.window-copy h1 em { color: var(--sun); }
 .window-copy__sub { color: var(--ink-soft); max-width: 26ch; }
 @media (max-width: 900px) {
   .window-frame, .window-glow { inset: 20% 14% 30%; border-radius: 120px; }
+  .window-frame__shade { border-radius: 120px 120px 0 0; }
   .window-copy { top: auto; bottom: 6%; width: auto; right: var(--gutter); padding-left: 0; text-align: center; }
-  .window-copy h2 { font-size: 34px; }
+  .window-copy h1 { font-size: 34px; }
   .window-copy__sub { margin: 0 auto; }
 }
 
-.scroll-cue { position: absolute; right: var(--gutter); bottom: clamp(28px, 5vh, 56px); z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 12px; color: #fff; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
-.scroll-cue i { width: 1px; height: 56px; background: rgba(255,255,255,.3); position: relative; overflow: hidden; }
-.scroll-cue i::after { content: ""; position: absolute; inset: 0; background: #fff; animation: cue 1.8s var(--ease) infinite; }
+.scroll-cue { position: absolute; right: var(--gutter); bottom: clamp(28px, 5vh, 56px); z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--ink); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; }
+.scroll-cue i { width: 1px; height: 56px; background: rgba(21,18,15,.2); position: relative; overflow: hidden; }
+.scroll-cue i::after { content: ""; position: absolute; inset: 0; background: var(--ink); animation: cue 1.8s var(--ease) infinite; }
 @keyframes cue { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
-@media (max-width: 900px) { .scroll-cue { bottom: 26px; height: auto; gap: 10px; } .scroll-cue i { height: 44px; } }
+@media (max-width: 900px) { .scroll-cue { display: none; } }
 
 /* ---------- Marquee ---------- */
 .marquee { padding: 34px 0; overflow: hidden; background: var(--paper); border-block: 1px solid var(--line); position: relative; z-index: 2; }
-.marquee__row { display: flex; white-space: nowrap; }
+.marquee__row { display: flex; width: max-content; white-space: nowrap; animation: marquee var(--dur, 60s) linear infinite; }
+.marquee__row[data-dir="-1"] { animation-direction: reverse; }
+/* the row holds two identical tracks: sliding by half its width lands exactly on the start again */
+@keyframes marquee { to { transform: translate3d(-50%, 0, 0); } }
 .marquee__track { display: flex; align-items: center; gap: 34px; padding-right: 34px; flex: none; font-family: var(--serif); font-size: clamp(36px, 5vw, 76px); line-height: 1.15; }
 .marquee__track span { display: inline-flex; align-items: center; gap: 18px; }
 .marquee__track .flag { width: .9em; height: .62em; border-radius: 4px; }
@@ -838,10 +805,6 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
    PHONES — polish
    ========================================================= */
 @media (max-width: 900px) {
-  .hud { top: 76px; font-size: 10px; }
-  .hero__content { padding-bottom: 26px; }
-  .hero__kicker { font-size: 10px; margin-bottom: 14px; }
-  .hero__title { font-size: clamp(50px, 14.5vw, 84px); }
 
   .marquee { padding: 22px 0; }
   .marquee__track { font-size: 34px; gap: 22px; padding-right: 22px; }
